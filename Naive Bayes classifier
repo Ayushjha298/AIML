@@ -1,0 +1,70 @@
+import numpy as np
+
+class NaiveBayesClassifier:
+    def __init__(self):
+        self.class_probs = {}  # P(class)
+        self.word_probs = {}   # P(word|class)
+
+    def fit(self, X, y):
+        # Calculate class probabilities
+        classes, class_counts = np.unique(y, return_counts=True)
+        total_samples = len(y)
+
+        for class_, count in zip(classes, class_counts):
+            self.class_probs[class_] = count / total_samples
+
+        # Calculate word probabilities for each class
+        for class_ in self.class_probs:
+            self.word_probs[class_] = {}
+
+        for class_ in self.class_probs:
+            class_samples = X[y == class_]
+            total_words_in_class = 0
+
+            for sample in class_samples:
+                total_words_in_class += len(sample.split())
+
+            for sample in class_samples:
+                words = sample.split()
+                for word in words:
+                    if word in self.word_probs[class_]:
+                        self.word_probs[class_][word] += 1 / total_words_in_class
+                    else:
+                        self.word_probs[class_][word] = 1 / total_words_in_class
+
+    def predict(self, X):
+        predictions = []
+        for sample in X:
+            max_prob = -1
+            predicted_class = None
+
+            for class_ in self.class_probs:
+                prob = np.log(self.class_probs[class_])
+
+                for word in sample.split():
+                    if word in self.word_probs[class_]:
+                        prob += np.log(self.word_probs[class_][word])
+                    else:
+                        prob += np.log(1e-10)  # Smoothing for unseen words
+
+                if prob > max_prob:
+                    max_prob = prob
+                    predicted_class = class_
+
+            predictions.append(predicted_class)
+
+        return predictions
+
+# Example usage:
+if __name__ == "__main__":
+    X = ["I like to play sports", "I hate rainy days", "Sports are fun", "Rainy days are boring"]
+    y = ["Sports", "Rainy", "Sports", "Rainy"]
+
+    nb_classifier = NaiveBayesClassifier()
+    nb_classifier.fit(X, y)
+
+    test_samples = ["I enjoy playing sports", "I dislike rainy weather"]
+    predictions = nb_classifier.predict(test_samples)
+
+    for sample, prediction in zip(test_samples, predictions):
+        print(f"Sample: '{sample}' -> Predicted Class: {prediction}")

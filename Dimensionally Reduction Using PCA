@@ -1,0 +1,33 @@
+import numpy as np
+from sklearn.decomposition import PCA
+
+# Generating synthetic data
+np.random.seed(0)
+X = 2 * np.random.rand(100, 5)  # 100 samples with 5 features
+
+# Creating a PCA model
+pca = PCA(n_components=2)  # Reduce to 2 principal components
+
+# Fitting and transforming the data
+X_reduced = pca.fit_transform(X)
+
+# Original data shape
+print("Original data shape:", X.shape)
+
+# Reduced data shape
+print("Reduced data shape:", X_reduced.shape)
+
+# Explained variance ratio
+explained_variance_ratio = pca.explained_variance_ratio_
+print("Explained Variance Ratio:", explained_variance_ratio)
+
+# Percentage of variance explained
+cumulative_variance_ratio = np.cumsum(explained_variance_ratio)
+print("Cumulative Variance Ratio:", cumulative_variance_ratio)
+
+# Plot the data in the reduced dimension
+import matplotlib.pyplot as plt
+plt.scatter(X_reduced[:, 0], X_reduced[:, 1])
+plt.xlabel("Principal Component 1")
+plt.ylabel("Principal Component 2")
+plt.show()
